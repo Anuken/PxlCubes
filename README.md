@@ -1,2 +1,2 @@
 # PxlCubes
-An isometric visualizer for [pixls.space](pixls.space).
+An isometric visualizer for [pxls.space](pxls.space).
