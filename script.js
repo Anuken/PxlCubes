@@ -209,11 +209,11 @@ function handleBoardInfo(data){
 
     console.log("Size: " + width + ", " + height + " palette: " + data.palette);
 
-    $.get("http://pxls.space/boarddata", handleBoard);
+    get("http://pxls.space/boarddata", handleBoard);
 }
 
 function setupBoard(){
-   $.get("http://pxls.space/boardinfo", handleBoardInfo);
+    get("http://pxls.space/info", handleBoardInfo);
     
     console.log("Sent board requests.");
 }
@@ -269,12 +269,10 @@ function setupCanvas(){
             }
         } 
     });
-   
-   /*
-    $( function() {
-        $( "#canvas" ).draggable();
-    });
-    */
+}
+
+function get(url, listener){
+    $.get("http://cors-anywhere.herokuapp.com/"+url, listener);
 }
 
 function rotate45(cx, cy){
