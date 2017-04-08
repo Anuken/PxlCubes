@@ -7,6 +7,8 @@
 <title>Pxls Visualizer</title>
 <link rel="icon" href="textures/cube.png">
 
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <style>
 
 @font-face {
@@ -32,14 +34,14 @@ body{
 
 #overlay{
 	color: red;
-	font-size: 30px;
+	font-size: 32px;
 	font-family: pixel;
 }
 
 #coords{
 	font-family: pixel;
 	text-align: right;
-	font-size: 20px;
+	font-size: 24px;
 	color: black;
 	width: 100%;
 }
@@ -47,11 +49,12 @@ body{
 #error{
 	font-family: pixel;
 	text-align: center;
-	font-size: 40px;
+	font-size: 32px;
 	color: red;
+	width: 100%;
 }
 
-#container canvas, #overlay, #coords {
+#container canvas, #overlay, #coords, #error {
   	position: absolute;
 }
 

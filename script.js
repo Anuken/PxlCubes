@@ -1,10 +1,13 @@
 
+var mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
 var width, height;
 var palette;
 var offsetx = 0, offsety = 0;
 var bdata;
 
 var cubew = 12, cubeh = 12;
+var cubescl = 1;
 
 var drawx = 0, dwidth = 70;
 var drawy = 0, dheight = 70;
@@ -80,13 +83,14 @@ function drawCube(x, y, z, i){
     cube.tint = cubePalette[i];
     cube.zOrder = -x;
     cube.displayGroup = layer;
+    cube.scale.set(cubescl, cubescl);
 
     stage.addChild(cube);
 }
 
 function updateCube(cube, x, y, z){
-    var cx = (x-dwidth/2-drawx)*cubew;
-    var cy = (y-dheight/2-drawy)*cubeh;
+    var cx = (x-dwidth/2-drawx)*cubew*cubescl;
+    var cy = (y-dheight/2-drawy)*cubeh*cubescl;
     var cz = z;
 
     var angle = Math.PI/4;
@@ -195,6 +199,12 @@ function handleBoard(data){
 
     stage.removeChild(stage.children[0]);
 
+    if(mobile){
+        dwidth = 35;
+        dheight = 35;
+        cubescl = 1;
+    }
+
     updateBoard();
 
     console.log("Done rendering.");
@@ -277,7 +287,8 @@ function setupCanvas(){
 function getCORS(aurl, listener){
     $.get("https://crossorigin.me/"+aurl, listener)
     .fail(function() {
-        $("error").text("Unable to fetch board. Try refreshing.")
+        console.log("big nasty error");
+        $("#error").html("Unable to fetch board.<br>Try refreshing.</br>")
     });
 }
 
