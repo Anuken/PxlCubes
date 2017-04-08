@@ -36,7 +36,22 @@ body{
 	font-family: pixel;
 }
 
-#container canvas, #overlay {
+#coords{
+	font-family: pixel;
+	text-align: right;
+	font-size: 20px;
+	color: black;
+	width: 100%;
+}
+
+#error{
+	font-family: pixel;
+	text-align: center;
+	font-size: 40px;
+	color: red;
+}
+
+#container canvas, #overlay, #coords {
   	position: absolute;
 }
 
@@ -45,6 +60,8 @@ body{
 <body onload="setup()">
 	<div id=container>
 		<div id="overlay"></div>
+		<div id="coords">100, 100</div>
+		<div id="error"></div>
 	</div>
 </body>
 

@@ -4,16 +4,16 @@ var palette;
 var offsetx = 0, offsety = 0;
 var bdata;
 
-var w = 12, h = 12;
+var cubew = 12, cubeh = 12;
 
-var startx = 0, drawx = 70;
-var starty = 0, drawy = 70;
+var drawx = 0, dwidth = 70;
+var drawy = 0, dheight = 70;
 
 var stage, renderer;
 var cubePalette;
 
 var levels = [];
-var scl = 2.11;
+var yscl = 2.11;
 
 var layer;
 
@@ -59,7 +59,7 @@ function connect(){
         if (data.type === "pixel" && bdata != undefined) {
             getLevel(data.x,data.y).push(data.color);
 
-            if(data.x >= startx && data.y >= starty && data.x < startx + drawx&& data.y < starty + drawy)
+            if(data.x >= drawx && data.y >= drawy && data.x < drawx + dwidth&& data.y < drawy + dheight)
             updateBoard();
         }
     };
@@ -85,8 +85,8 @@ function drawCube(x, y, z, i){
 }
 
 function updateCube(cube, x, y, z){
-    var cx = (x-drawx/2-startx)*w;
-    var cy = (y-drawy/2-starty)*h;
+    var cx = (x-dwidth/2-drawx)*cubew;
+    var cy = (y-dheight/2-drawy)*cubeh;
     var cz = z;
 
     var angle = Math.PI/4;
@@ -97,7 +97,7 @@ function updateCube(cube, x, y, z){
     var ox = ca*cx - sa*cy, oy = sa*cx + ca*cy;
 
     cube.x = Math.floor(ox + renderer.width/2);
-    cube.y = Math.floor(oy/scl - cz*10 + renderer.height/2);
+    cube.y = Math.floor(oy/yscl - cz*10 + renderer.height/2);
 }
 
 function setupPixi(){
@@ -138,11 +138,11 @@ function setupPixi(){
 
 function updateBoard(){
 
-    if(startx < 0) startx = 0;
-    if(starty < 0) starty = 0;
+    if(drawx < 0) drawx = 0;
+    if(drawy < 0) drawy = 0;
 
-    if(startx + drawx > width) startx = width-drawx;
-    if(starty + drawy > height) starty = height-drawy;
+    if(drawx + dwidth > width) drawx = width-dwidth;
+    if(drawy + dheight > height) drawy = height-dheight;
 
     var exists = []
     var children = stage.children.slice(0);
@@ -150,7 +150,7 @@ function updateBoard(){
     for (var i = children.length - 1; i >= 0; i--){
         var child = children[i];
 
-        if(child.drawx < startx || child.drawy < starty || child.drawx >= startx + drawx || child.drawy >= starty + drawy){
+        if(child.drawx < drawx || child.drawy < drawy || child.drawx >= drawx + dwidth || child.drawy >= drawy + dheight){
             stage.removeChild(child);
             exists[child.drawx + "," + child.drawy] = false
         }else{
@@ -159,8 +159,8 @@ function updateBoard(){
         }
     }
 
-    for(var x = startx; x < startx+drawx; x ++){
-        for(var y = starty; y < starty+drawy; y ++){
+    for(var x = drawx; x < drawx+dwidth; x ++){
+        for(var y = drawy; y < drawy+dheight; y ++){
             if(exists[x + "," + y]){
                 continue;
             }
@@ -172,7 +172,7 @@ function updateBoard(){
             }
         }
     }
-
+    $("#coords").text((drawx+dwidth/2) + ", "+(drawy+dheight/2));
     renderer.render(stage);
 }
 
@@ -206,8 +206,8 @@ function handleBoardInfo(data){
     height = data.height;
     palette = data.palette;
 
-    startx = width/2;
-    starty = height/2;
+    drawx = width/2;
+    drawy = height/2;
 
     getCORS("http://pxls.space/boarddata", handleBoard);
 }
@@ -224,16 +224,16 @@ function setupCanvas(){
         key = e.keyCode;
 
         if (key == '38') {
-            starty -= 1;
+            drawy -= 1;
             updateBoard();
         }else if (key == '40') {
-            starty += 1;
+            drawy += 1;
             updateBoard();
         }else if (key == '37') {
-            startx -= 1;
+            drawx -= 1;
             updateBoard();
         }else if (key == '39') {
-            startx += 1;
+            drawx += 1;
             updateBoard();
         }
     };
@@ -249,59 +249,36 @@ function setupCanvas(){
     $(document).bind("mousedown touchstart", 
         function(e){
            click = true;
-            x = e.pageX;
-            y = e.pageY;
-            ox = startx*w;
-            oy = starty*h;
+            x = e.pageX || e.touches[0].pageX;
+            y = e.pageY || e.touches[0].pageY;
+            ox = drawx*cubew;
+            oy = drawy*cubeh;
             $(document.body).css("cursor", "move");
         });
 
     $(document).bind("mousemove touchmove", 
         function(e){
             if(click){
-                var vector = rotate45(e.pageX - x, e.pageY - y);
+                var vector = rotate45((e.pageX || e.touches[0].pageX) - x, (e.pageY || e.touches[0].pageY) - y);
                 ox -= vector.x;
                 oy -= vector.y;
-                var px = Math.floor(ox/w), py = Math.floor(oy/h);
-                if(px || py != starty){
-                    startx = px;
-                    starty = py;
+                var px = Math.floor(ox/cubew), py = Math.floor(oy/cubeh);
+                if(px || py != drawy){
+                    drawx = px;
+                    drawy = py;
                     updateBoard();
                 }
-                x = e.pageX;
-                y = e.pageY;
+                x = e.pageX || e.touches[0].pageX;
+                y = e.pageY || e.touches[0].pageY;
             }
         });
 }
 
 function getCORS(aurl, listener){
-    $.get("https://crossorigin.me/"+aurl, listener);
-
-    /*
-    script = document.createElement('script');
-    script.type = 'text/javascript';
-    script.src = 'http://pxls.space/info?callback=corsload';
-    //console.log("getting " + aurl);
-    //$.get("http://pxlcubes.herokuapp.com/" + aurl, listener);
-    /*
-    $.ajax({
-         url: "http://hidden-caverns-75151.herokuapp.com/",
-         type: "GET",
-         headers: {'Target-URL': url}
+    $.get("https://crossorigin.me/"+aurl, listener)
+    .fail(function() {
+        $("error").text("Unable to fetch board. Try refreshing.")
     });
-    */
-
-/*
-    $.ajax({
-        url: "http://pxlcubes.herokuapp.com/",
-        type: "GET",
-        contentType: "text/plain",
-        
-        beforeSend: function(request) {
-            request.setRequestHeader("warning", aurl);
-        }
-    });
-    */
 }
 
 function rotate45(cx, cy){
