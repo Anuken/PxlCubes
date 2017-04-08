@@ -9,6 +9,11 @@
 
 <style>
 
+@font-face {
+    font-family: pixel;
+    src: url(Pixel.ttf);
+}
+
 #canvas{
 	display: block;
     margin: auto;
@@ -20,9 +25,26 @@ body{
 	overflow: hidden;
 	color: white;
 }
+
+#container {
+  	position: relative;
+}
+
+#overlay{
+	color: red;
+	font-size: 30px;
+	font-family: pixel;
+}
+
+#container canvas, #overlay {
+  	position: absolute;
+}
+
 </style>
 
 <body onload="setup()">
-
+	<div id=container>
+		<div id="overlay"></div>
+	</div>
 </body>
 

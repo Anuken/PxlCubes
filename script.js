@@ -60,10 +60,12 @@ function connect(){
             getLevel(data.x,data.y).push(data.color);
 
             if(data.x >= startx && data.y >= starty && data.x < startx + drawx&& data.y < starty + drawy)
-            //drawCube(data.x, data.y, (getLevel(data.x,data.y).length-1), data.color);
-            //renderer.render(stage);
             updateBoard();
         }
+    };
+
+    ws.onclose = function(){
+        $("#overlay").text("Disconnected from server!");
     };
 }
 
@@ -103,7 +105,7 @@ function setupPixi(){
     renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight);
     renderer.backgroundColor = 0xFFFFFF;
 
-    document.body.appendChild(renderer.view);
+    document.getElementById("container").insertBefore(renderer.view, document.getElementById("overlay"));
 
     renderer.view.style.position = "absolute";
     renderer.view.style.display = "block";
@@ -207,13 +209,11 @@ function handleBoardInfo(data){
     startx = width/2;
     starty = height/2;
 
-    console.log("Size: " + width + ", " + height + " palette: " + data.palette);
-
-    get("http://pxls.space/boarddata", handleBoard);
+    getCORS("http://pxls.space/boarddata", handleBoard);
 }
 
 function setupBoard(){
-    get("http://pxls.space/info", handleBoardInfo);
+    getCORS("http://pxls.space/info", handleBoardInfo);
     
     console.log("Sent board requests.");
 }
@@ -240,20 +240,24 @@ function setupCanvas(){
 
     var x, y, click = false, ox, oy;
 
-    $(document).on({
-        mouseup: function(e){
+    $(document).bind("mouseup touchend", 
+        function(e){
             click = false;
             $(document.body).css("cursor", "auto");
-        }, 
-        mousedown: function(e){
-            click = true;
+        });
+
+    $(document).bind("mousedown touchstart", 
+        function(e){
+           click = true;
             x = e.pageX;
             y = e.pageY;
             ox = startx*w;
             oy = starty*h;
             $(document.body).css("cursor", "move");
-        }, 
-        mousemove: function(e){
+        });
+
+    $(document).bind("mousemove touchmove", 
+        function(e){
             if(click){
                 var vector = rotate45(e.pageX - x, e.pageY - y);
                 ox -= vector.x;
@@ -267,12 +271,37 @@ function setupCanvas(){
                 x = e.pageX;
                 y = e.pageY;
             }
-        } 
-    });
+        });
 }
 
-function get(url, listener){
-    $.get("http://cors-anywhere.herokuapp.com/"+url, listener);
+function getCORS(aurl, listener){
+    $.get("https://crossorigin.me/"+aurl, listener);
+
+    /*
+    script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = 'http://pxls.space/info?callback=corsload';
+    //console.log("getting " + aurl);
+    //$.get("http://pxlcubes.herokuapp.com/" + aurl, listener);
+    /*
+    $.ajax({
+         url: "http://hidden-caverns-75151.herokuapp.com/",
+         type: "GET",
+         headers: {'Target-URL': url}
+    });
+    */
+
+/*
+    $.ajax({
+        url: "http://pxlcubes.herokuapp.com/",
+        type: "GET",
+        contentType: "text/plain",
+        
+        beforeSend: function(request) {
+            request.setRequestHeader("warning", aurl);
+        }
+    });
+    */
 }
 
 function rotate45(cx, cy){
