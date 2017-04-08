@@ -83,7 +83,6 @@ function drawCube(x, y, z, i){
     cube.tint = cubePalette[i];
     cube.zOrder = -x;
     cube.displayGroup = layer;
-    cube.scale.set(cubescl, cubescl);
 
     stage.addChild(cube);
 }
@@ -102,6 +101,7 @@ function updateCube(cube, x, y, z){
 
     cube.x = Math.floor(ox + renderer.width/2);
     cube.y = Math.floor(oy/yscl - cz*10 + renderer.height/2);
+    cube.scale.set(cubescl, cubescl);
 }
 
 function setupPixi(){
@@ -141,6 +141,7 @@ function setupPixi(){
 }
 
 function updateBoard(){
+    if(bdata == undefined) return;
 
     if(drawx < 0) drawx = 0;
     if(drawy < 0) drawy = 0;
@@ -282,6 +283,13 @@ function setupCanvas(){
                 y = e.pageY || e.touches[0].pageY;
             }
         });
+    
+    $(document).bind('mousewheel DOMMouseScroll', function(event){
+        var delta = event.originalEvent.wheelDelta || event.originalEvent.detail;
+        cubescl += delta/500.0;
+        if(cubescl < 0.1) cubescl = 0.1;
+        updateBoard();
+    });
 }
 
 function getCORS(aurl, listener){
