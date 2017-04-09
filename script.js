@@ -87,7 +87,7 @@ function drawCube(x, y, z, i){
     cube.drawy = y;
     cube.drawz = z;
     cube.tint = cubePalette[i];
-    cube.zOrder = -x-z;
+    cube.zOrder = -x-z/100.0;
     cube.displayGroup = layer;
 
     updateCube(cube, x, y, z);
@@ -245,8 +245,6 @@ function setupCanvas(){
     document.onkeydown = function(e){
         key = e.keyCode;
 
-        //getLevel(drawx + dwidth/2, drawy + dheight/2).push(3);
-
         if (key == '38') {
             drawy -= 1;
             updateBoard();
@@ -306,7 +304,7 @@ function setupCanvas(){
 }
 
 function getCORS(aurl, listener){
-    $.get("https://crossorigin.me/"+aurl, listener)
+    $.get("https://cors-anywhere.herokuapp.com/"+aurl, listener)
     .fail(function() {
         console.log("big nasty error");
         $("#error").html("Unable to fetch board.<br>Try refreshing.</br>")
