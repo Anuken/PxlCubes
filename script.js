@@ -58,11 +58,18 @@ function connect(){
 
     ws.onmessage = function (msg) {
         var data = JSON.parse(msg.data);
-
         if (data.type === "pixel" && bdata != undefined) {
-            getLevel(data.x,data.y).push(data.color);
-
-            if(data.x >= drawx && data.y >= drawy && data.x < drawx + dwidth&& data.y < drawy + dheight)
+            update = false;
+            var pixels = data.pixels;
+            pixels.forEach(function(o){
+                getLevel(o.x, o.y).push(o.color);
+                
+                if(o.x >= drawx && o.y >= drawy && o.x <= drawx + dwidth && o.y <= drawy + dheight){
+                    drawCube(o.x, o.y, getLevel(o.x, o.y).length-1, o.color);
+                    update = true;
+                }
+            });
+            if(update)
             updateBoard();
         }
     };
@@ -76,21 +83,24 @@ function drawCube(x, y, z, i){
     var color = cubePalette[i];
     
     var cube = new PIXI.Sprite(PIXI.loader.resources["textures/cube.png"].texture);
-    updateCube(cube, x, y, z);
     cube.drawx = x;
     cube.drawy = y;
     cube.drawz = z;
     cube.tint = cubePalette[i];
-    cube.zOrder = -x;
+    cube.zOrder = -x-z;
     cube.displayGroup = layer;
+
+    updateCube(cube, x, y, z);
 
     stage.addChild(cube);
 }
 
 function updateCube(cube, x, y, z){
+    cube.scale.set(cubescl, cubescl);
+
     var cx = (x-dwidth/2-drawx)*cubew*cubescl;
     var cy = (y-dheight/2-drawy)*cubeh*cubescl;
-    var cz = z;
+    var cz = z*cubescl;
 
     var angle = Math.PI/4;
 
@@ -101,7 +111,6 @@ function updateCube(cube, x, y, z){
 
     cube.x = Math.floor(ox + renderer.width/2);
     cube.y = Math.floor(oy/yscl - cz*10 + renderer.height/2);
-    cube.scale.set(cubescl, cubescl);
 }
 
 function setupPixi(){
@@ -152,15 +161,15 @@ function updateBoard(){
     var exists = []
     var children = stage.children.slice(0);
 
-    for (var i = children.length - 1; i >= 0; i--){
+    for (var i = 0; i < children.length; i++){
         var child = children[i];
 
         if(child.drawx < drawx || child.drawy < drawy || child.drawx >= drawx + dwidth || child.drawy >= drawy + dheight){
             stage.removeChild(child);
-            exists[child.drawx + "," + child.drawy] = false
+            exists[child.drawx + "," + child.drawy] = false;
         }else{
             updateCube(child, child.drawx, child.drawy, child.drawz);
-            exists[child.drawx + "," + child.drawy] = true
+            exists[child.drawx + "," + child.drawy] = true;
         }
     }
 
@@ -177,6 +186,8 @@ function updateBoard(){
             }
         }
     }
+    
+
     $("#coords").text((drawx+dwidth/2) + ", "+(drawy+dheight/2));
     renderer.render(stage);
 }
@@ -233,6 +244,8 @@ function setupCanvas(){
 
     document.onkeydown = function(e){
         key = e.keyCode;
+
+        //getLevel(drawx + dwidth/2, drawy + dheight/2).push(3);
 
         if (key == '38') {
             drawy -= 1;
