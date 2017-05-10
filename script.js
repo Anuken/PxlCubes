@@ -52,7 +52,7 @@ function getLevel(x, y){
 }
 
 function connect(){
-    var url = "ws://pxls.space/ws";
+    var url = "wss://pxls.space/ws";
 
     var ws = new WebSocket(url);
 
